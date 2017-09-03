@@ -1,0 +1,1154 @@
+\documentclass[12pt]{article}
+%\usepackage[pass,letterpaper]{geometry}              %This package needs to be enaled when dvi--->ps----->PDF
+\usepackage{stmaryrd, amsfonts, mathptmx, mathtools, array, siunitx, subfigure, graphicx, listings, etoolbox, srcltx,caption }
+\usepackage{multirow, indentfirst, cite, verbatim, keyval, textcomp, enumerate, calc, microtype, color,marvosym, xcolor, makecell}
+\usepackage[colorlinks,linktocpage,dvips]{hyperref}
+\hypersetup{
+   colorlinks   = true,                               %Colours links instead of ugly boxes
+   urlcolor     = blue,                               %Colour for external hyper links
+   linkcolor    = blue,                               %Colour of internal links
+   citecolor    = red,                                %Colour of citations
+   setpagesize  = false,
+   linktocpage  = true,
+}
+
+\makeatletter
+\patchcmd{\l@section}
+  {\hfil}
+  {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+  {}{}
+\makeatother
+
+\renewcommand\theadfont{\bfseries}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\newcommand\JSONnumbervaluestyle{\color{blue}}
+\newcommand\JSONstringvaluestyle{\color{red}}
+
+% switch used as state variable
+\newif\ifcolonfoundonthisline
+
+\makeatletter
+
+\lstdefinestyle{json}
+{
+  showstringspaces    = false,
+  keywords            = {false,true},
+  alsoletter          = 0123456789.,
+  morestring          = [s]{"}{"},
+  stringstyle         = \ifcolonfoundonthisline\JSONstringvaluestyle\fi,
+  MoreSelectCharTable =%
+    \lst@DefSaveDef{`:}\colon@json{\processColon@json},
+  basicstyle          = \ttfamily,
+  keywordstyle        = \ttfamily\bfseries,
+}
+
+% flip the switch if a colon is found in Pmode
+\newcommand\processColon@json{%
+  \colon@json%
+  \ifnum\lst@mode=\lst@Pmode%
+    \global\colonfoundonthislinetrue%
+  \fi
+}
+
+\lst@AddToHook{Output}{%
+  \ifcolonfoundonthisline%
+    \ifnum\lst@mode=\lst@Pmode%
+      \def\lst@thestyle{\JSONnumbervaluestyle}%
+    \fi
+  \fi
+  %override by keyword style if a keyword is detected!
+  \lsthk@DetectKeywords%
+}
+
+% reset the switch at the end of line
+\lst@AddToHook{EOL}%
+  {\global\colonfoundonthislinefalse}
+
+
+
+\parskip 0.5em
+\parindent 2em
+\setlength{\textwidth}{6.0in} \setlength{\textheight}{8.8in}
+\setlength{\topmargin}{0.4in} \setlength{\headheight}{0.0in}
+\setlength{\headsep}{0.0in} \setlength{\oddsidemargin}{0.25in}
+\setlength{\parindent}{.2in}
+%\renewcommand{\baselinestretch}{1.5}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{1em}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\title{\textbf{Report \#1} \\ \textbf{Deep Learning Course}}%
+\title{\textbf{\huge{CAFFE DOCUMENTATION}} \\ DEEP LEARNING COURSE}%
+
+\author{Data Science Program, GWU, USA \\
+School of Electrical and Computer Engineering, OSU, USA\\
+\vspace{1cm}\\
+\Letter : martin.t.hagan@okstate.edu\\
+\Letter : ajafari@gwu.edu\\
+\Letter : amir.h.jafari@okstate.edu  }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\begin{figure}
+\centering \includegraphics[width=2in, height=1in]{fig/GW_logo.eps}\hfill
+\centering \includegraphics[width=1in, height=1in]{fig/logo1.eps}\hfill
+\end{figure}
+
+\begin{figure}
+\centering \includegraphics[width=2in, height=2in]{fig/caffe.eps}                                     % Logo or a photo of you, adjust its dimensions here.
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+%\lstlistoflistings
+%\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{CAFFE MODEL ARCHITECTURE} \label{CAFFE MODEL ARCHITECTURE}
+
+A caffe model consists of layers and number of parameters. All parameters are defined in the document file which called caffe.proto (Caffe layers and their parameters are defined in the protocol buffer definitions for the project in caffe.proto. \cite{Berkeley}) To use caffe,w e need to learn the configuration file (prototxt) preparation. There are many types of layers, such as Data, Convolution, Pooling, etc. The data flow between the layers called Blobs. To run caffe, we need to create a model, there are  commonly used models available such as  Lenet, Alex, etc.
+
+\subsection{Blob, Layer and NET}\label{Blob, Layer and NET}
+
+Deep neural network (DNN) is composed of many layers interconnected together. Caffe software is a tool to make a deep neural network and train these kind of network architectures. Caffe has a certain strategy, to build a model layer by layer. It is defined as all information and data blobs, so as to facilitate the conduct of operations and communications. Blob is caffe framework of a standard array of a unified memory interface. We will describe storage information and communication between the layers in detailed in section (\ref{Blob}) , (\ref{Layer}) and (\ref{NET}).
+
+\subsubsection{Blob}\label{Blob}
+
+Blobs encapsulates the data at runtime while the computation is done in CPU or GPU. Mathematically, blob is an N-dimensional array. Basically, blob is the main and basic component of data storage in caffe software (Matlab uses matrix as the main component). Matrix is ​​two-dimensional array, however, blob is an N-dimensional array. The N dimension in blob can be varied (e.g 2, 3, and so on). For image data, blob can be expressed as $n_{i} \times c_{i} \times h_{i} \times w_{i}$ a 4D array. Where $n_{i}$ represents the number of pictures, $c_{i}$ represents the channels (color image has 3 channels for Red, Green and Blue, gray has one channel), $h_{i}$ and $w_{i}$ respectively represent the height and width of the image. Of course, in addition to image data, blob can also be used for non-image data. For example, conventional multi layer perceptron (MLP), is relatively simple to connect the entire network with the 2D blob, using the innerProduct layer to calculate network output.
+
+Model parameters are represented in blob with the certain format. For example, in a convolution by having a color image we have to enter the 3  as channel value, and if there are 96 convolution kernels with image size of ($11 \times 11$), therefore the blob contains ($96 \times 3 \times 11 \times 11$) value.
+
+\subsubsection{Layer}\label{Layer}
+
+Layer is composed of elements which defines the operation of the layer and it has a certain format called JSON format. JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. In each layer, we have a section and subsection and they can be distinguished by the curly brackets. Each section and subsection has some fields and for each field we can have a selection of options. Lets look at the following example for the convolution layer:
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    num_output: 96
+    kernel_size: 11
+    stride: 4n
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+\end{lstlisting}
+
+Now, layer, bias\underline{{ }{ }}filler are the section and subsection respectively and name, type, bottom and top are fields. Each fields in section or in a subsection has selection. For example, name in this layer has the selection of conv1 (name is arbitrary to choose for each layer), type has the selection of Convolution which shows that this layer is a convolution layer. We will go into the detailed of each fields and its selections in later sections.
+
+Fig. \ref{fig:Layer} shows the simple layer:
+\begin{figure}
+	\centerline{\includegraphics[width=2in, height=3in]{fig/layer.eps}}
+	\caption{Layer}
+	\label{fig:Layer}
+\end{figure}
+As you can see the in the figure the layer layout structured as bottom to top. In this example, this convolution layer connected to the data with bottom blob and the top blob can be connected to the next layer. The layers are connected together by top and bottoms. The yellow polygons are the implicit connection to other layers and the blue rectangle represents the convolution layer.
+
+\subsubsection{NET}\label{NET}
+
+Like building blocks, a caffe network contains more than one layer, they are connected together from bottom to top. The caffe model has one file which contains all the jason formats for each layer that is called .prototxt file. In this file all sections will define the caffe layers and types of operation and the fields and selections are the options to configure the layer to perform an specific task.
+
+Lets look at simple two-layer model defined in neural networks. Fig. \ref{fig:NET} shows the network topology.
+
+\noindent The first layer is a data layer which is named as mnist. For the filed of type the data is used for the section. There is no bottom for the data layer however there is two tops which connects the data layer to the innerproduct layer and the loss layer (yellow polygons are the implicit connections). The top second InnerProduct layer is connected to the bottom of the loss layer. The third layer has two bottoms, one for ip and the other one is for data labels. There is top for an output loss which is not drawn. Prototxt corresponding configuration file can be written:
+
+\begin{lstlisting}[style=json, frame=single]
+name: "LogReg"
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  data_param {
+    source: "input_leveldb"
+    batch_size: 64
+  }
+}
+layer {
+  name: "ip"
+  type: "InnerProduct"
+  bottom: "data"
+  top: "ip"
+  inner_product_param {
+    num_output: 2
+  }
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "ip"
+  bottom: "label"
+  top: "loss"
+}
+\end{lstlisting}
+
+
+\begin{figure}[htp]
+	\centerline{\includegraphics[width=3in, height=4in]{fig/NET.eps}}
+	\caption{NET}
+	\label{fig:NET}
+\end{figure}
+
+
+\subsection{Data Layer and Parameters}
+
+Now in this section, we will first introduce the data layer. Data layer is the bottom of each caffe model and it is the entry model. This layer not only to provide input data, but it  provides a data conversion from blobs into another format to save the output. Preprocessing and normalizing data is done in this layer (subtracting the mean, zoom, crop, and mirroring). In this layer we configure and set the desired parameters. There are several format of databases that caffe accepts. These format are efficient ways of reading datas such as LevelDB and LMDB. If the efficiency is not important, the data can also be fetched from the disk file and image formats hdf5 file. Lets look at the common data layer format.
+
+Lets look at the typical example of a data layer prototxt file.
+
+\begin{lstlisting}[style=json, frame=single]
+name: "CaffeNet"
+layer {
+  name: "Input"
+  type: "Data"
+  top: "data"
+  top: "Target"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: true
+    crop_size: 227
+    mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"
+  }
+  data_param {
+    source: "examples/imagenet/ilsvrc12_train_lmdb"
+    batch_size: 256
+    backend: LMDB
+  }
+}
+\end{lstlisting}
+
+\noindent In any layer section, usually we have the following fields:
+
+\begin{itemize}
+  \item \textbf{name}
+  \item \textbf{type}
+  \item \textbf{top or bottom}
+\end{itemize}
+
+\noindent For the selection of each fields we need to pick the right option to configure the layer. For example for the data layer we can have the following selections for their associated fields.
+
+\begin{table}[htp]
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{| m{1in}| m{4.5in}|}
+\hline
+\thead{Fields}                         & \thead{Selction}   \\ \hline \hline
+\textbf{name}                          & An arbitrary name can be used for each layer.           \\ \hline
+\textbf{type}                          & LevelDB or LMDB, MemoryData, HDF5Data, ImageData, WindowData     \\ \hline
+\textbf{top or bottom}                 & layer names       \\ \hline
+\end{tabular}
+\caption{Data layer section fields and selections}
+\label{tab:Data layer section fields and selections}
+\end{table}
+
+\noindent \textbf{type} shows the layer functionality. Since this is a data type layer, we need to provide the the source and format of the data. There are different formats of data bases. In general practice the LevelDB or LMDB data is used. \textbf{top or bottom}: Each layer has bottom and top parts. Bottom identifies other layers that are inputs to this layer, and top identifies layers that this layer outputs to. Bottom is the input and top would be the output of the layer. Sometimes we have multiple top or more bottom to have more connections to other layers. In the data layer, at least one of the top sections is the data. The second top selection is our target.
+
+As we said before, in each section we have subsections and each subsection has it on fields and selections.
+
+\begin{table}[htp]
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{| m{1in}| m{4.5in}|}
+\hline
+\thead{Fields}                         & \thead{Selction}   \\ \hline \hline
+\textbf{include}                       & Train and Test     \\ \hline
+\end{tabular}
+\caption{Data layer subsection fields and selections}
+\label{tab:Data layer subsection fields and selections}
+\end{table}
+
+\noindent \textbf{include}: In the time of general training and testing, layer model is not the same. There is a layer with a training phase and another layer with a testing phase, this is done with the include section. If you do not include parameters, it indicates that the layer model both in training and testing.
+
+\noindent The \textbf{transform\underline{{ }{ }}param} subsection has the set fields and selections to configure. This field contains parameters that are used to preprocess or transform the data before it is output to the next layer
+
+\begin{table}[htp]
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{| m{1in}| m{4.5in}|}
+\hline
+\thead{Fields}                         & \thead{Selction}                 \\ \hline \hline
+\textbf{mirror}                        & True and False                    \\ \hline
+\textbf{crop\underline{{ }{ }}size}    & Integer value to set the size     \\ \hline
+\textbf{mean\underline{{ }{ }}file}    & It is the path to the binaryproto file    \\ \hline
+\end{tabular}
+\caption{Data layer subsection preprocessing fields and selections}
+\label{tab:Data layer subsection preprocessing fields and selections}
+\end{table}
+
+\noindent The configuration of the input data is done in this subsection. The \textbf{data\underline{{ }{ }}param} subsection has the set fields and selections to configure.
+
+\begin{table}[htp]
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{| m{1in}| m{4.5in}|}
+\hline
+\thead{Fields}                         & \thead{Selction}                 \\ \hline \hline
+\textbf{source}                        & The directory path that contains the name of the database is in the source section.                    \\ \hline
+\textbf{batch\underline{{ }{ }}size}   & Integer value to set the size     \\ \hline
+\textbf{backend}                       & Choose one of the types from Table \ref{tab:Data layer section fields and selections}    \\ \hline
+\end{tabular}
+\caption{Data layer subsection data parameter fields and selections}
+\label{tab:Data layer subsection data parameter  fields and selections}
+\end{table}
+
+There are 5 selections for the type fields in the data layer section which are as follows
+
+\begin{itemize}
+  \item \textbf{LevelDB and LMDB}
+  \item \textbf{Data from the memory}
+  \item \textbf{Data from HDF5}
+  \item \textbf{From the image data}
+  \item \textbf{Data from the Windows}
+\end{itemize}
+
+The following examples prototxt files are listed for all these data bases and formats.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  top: " Input "
+  top: " Target "
+  name: " memory_data "
+  type: " MemoryData "
+  memory_data_param {
+    batch_size: 2
+    height: 100
+    width: 100
+    channels: 1
+  }
+  transform_param {
+    Scale: 0.0078125
+    mean_file: " mean.proto "
+    mirror: false
+  }
+}
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Input "
+  type: " HDF5Data "
+  top: " Data "
+  top: " Target "
+  hdf5_data_param {
+    source: " examples/ Data / train.txt "
+    batch_size: 10
+  }
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Input "
+  type: " the ImageData "
+  top: " Data "
+  top: " Target "
+  transform_param {
+    mirror: false
+    crop_size: 227
+    mean_file: " Data/ilsvrc12/imagenet_mean.binaryproto "
+  }
+  image_data_param {
+    Source: " examples /_temp/ file_list.txt "
+    batch_size: 50
+    new_height: 256
+    new_width: 256
+  }
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Input "
+  type: " WindowData "
+  top: " Data "
+  top: " Target "
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: true
+    crop_size: 227
+    mean_file: " Data/ilsvrc12/imagenet_mean.binaryproto "
+  }
+  window_data_param {
+    source:"finetune_pascal_detection/trainval.txt"
+    batch_size: 128
+    fg_threshold: 0.5
+    bg_threshold: 0.5
+    fg_fraction: 0.25
+    context_pad: 16
+    crop_mode: " Warp "
+  }
+}
+\end{lstlisting}
+
+\textbf{Summary:}
+
+\noindent As you can see from all the following example they share a lot of fields together and they are different in the selections. Also, you can have one universal data layer format which you are able to change the selection to configure it to different data bases.
+
+\newpage
+
+\subsection{Vision Layers, Pooling and LRN}
+
+Vision layers usually take images as input and produce other images as output. A typical “image” in the real-world may have one color channel ($c_{i}=1$), as in a grayscale image, or three color channels ($c_{i}=3$) as in an RGB (red, green, blue) image. But in this context, the distinguishing characteristic of an image is its spatial structure: usually an image has some non-trivial height $h_{i}>1$ and width $w_{i}>1$. This 2D geometry naturally lends itself to certain decisions about how to process the input. In particular, most of the vision layers work by applying a particular operation to some region of the input to produce a corresponding region of the output. In contrast, other layers (with few exceptions) ignore the spatial structure of the input, effectively treating it as “one big vector” with dimension $c_{i} \times h_{i} \times w_{i}$.
+
+\subsubsection{Convolution Layer}
+
+The Convolution layer convolves the input image with a set of learnable kernels, each producing one feature map in the output image \cite{Berkeley}.In this layer the input image convolves with a bank of kernels  (biases also can be added).
+
+\noindent \textbf{Layer Type}: Convolution
+
+\noindent \textbf{lr\underline{{ }{ }}mult}: It is a layer learning rate. The over all learning rate is base\underline{{ }{ }}lr and it is set in solver prototxt.
+
+\noindent You must set the parameters:
+
+\noindent \textbf{num\underline{{ }{ }}output}: the number of feature maps
+
+\noindent \textbf{kernel\underline{{ }{ }}size}: Specifies height and width of each kernel. If the convolution kernel is unequal length and width then we need to change the kernel\underline{{ }{ }}h kernel\underline{{ }{ }}w.
+
+\emph{Other parameters:}
+
+\noindent \textbf{stride}: Specifies the intervals at which to apply the kernels to the input, the default is 1. You can also have unequal length stride, we need to set stride\underline{{ }{ }}h and stride\underline{{ }{ }}w.
+
+\noindent \textbf{pad}: Specifies the number of pixels to (implicitly) add to each side of the input, the default is 0. If the kernel size is 5 * 5 and the pad is set to 2, the four edges are expanded two pixels in width and height (four pixels). For unequal padding we can set the pad\underline{{ }{ }}h and pad\underline{{ }{ }}w respectively.
+
+\noindent  \textbf{weight\underline{{ }{ }}filler}: Weight initialization. The default is "constant" and set to 0. Most of times used as "xavier" algorithm to initialize (can be set to "gaussian").
+
+\noindent   \textbf{bias\underline{{ }{ }}filler}: Bias initialization. Usually set to "constant" with values of zero.
+
+\noindent   \textbf{bias\underline{{ }{ }}term}:  Specifies whether to learn and apply a set of additive biases to the filter outputs.
+
+\noindent \textbf{group}:  If $g > 1$, we restrict the connectivity of each filter to a subset of the input. Specifically, the input and output channels are separated into g groups, and the iith output group channels will be only connected to the i-th input group channels.
+
+\noindent Input: $n_{i} \times c_{i} \times w_{i} \times h_{i}$
+
+\noindent Output: $n_{o} \times c_{o} \times w_{o} \times h_{o}$
+
+\noindent Where $c_{o}$ is the parameter num\underline{{ }{ }}output, the number of generated feature map,
+
+\noindent $w_{o} = (w_{i} + 2 \times PAD - kernel\_size) / STRIDE + 1$
+
+\noindent $h_{o} = (h_{i} + 2 \times PAD - kernel\_size) / STRIDE + 1$
+
+\noindent If the stride is set to 1, there is an overlap twice before and after convolution section. If pad = (kernel\underline{{ }{ }}size-1) / 2, then after the operation, the width and height unchanged.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " CONV1 "
+  type: " Convolution "
+  bottom: " Data "
+  top: " CONV1 "
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 20
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      of the type: " Xavier "
+    }
+    bias_filler {
+      type: " Constant "
+    }
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Pooling Layer}
+
+It is called pooling layer  in order to reduce the amount of computation and data dimensions and settings.
+
+\noindent \textbf{Layer Type}: Pooling
+
+\noindent You must set the parameters:
+\noindent 　 \textbf{kernel\underline{{ }{ }}size}: Specifies height and width of each kernel. Also it can be set separately with kernel\underline{{ }{ }}h and kernel\underline{{ }{ }}w.
+\emph{Other parameters:}
+
+\noindent \textbf{pool}: Pooling method, the default is MAX. Other available methods are MAX, AVE, or STOCHASTIC
+\noindent \textbf{pad}: Specifies the number of pixels to (implicitly) add to each side of the input. The default value is 0.
+\noindent \textbf{stride}: Pooling step size, the default value is set to 1. Generally, we set it to 2 for kernel size 2, to prevent overlapping. For unequal stride we can also set stride\underline{{ }{ }}h and stride\underline{{ }{ }}w.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " pool1 "
+  type: " Pooling "
+  bottom: " CONV1 "
+  top: " pool1 "
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    STRIDE: 2
+  }
+}
+\end{lstlisting}
+
+\noindent The method of operation and the pooling layer is substantially the same as the convolution layer.
+
+\noindent Input: $n \times c_{i} \times w_{i} \times h_{i}$
+
+\noindent Output: $n \times c_{o} \times w_{o} \times h_{o}$
+
+
+\noindent And the difference between the convolution layer is one of the $c$ remains unchanged
+
+\noindent $w_{o} = (w_{i} + 2 * PAD kernel_size) / STRIDE + 1$
+
+\noindent $h_{o} = (h_{i} + 2 * PAD kernel_size) / STRIDE + 1$
+
+\noindent If the stride is set to 2 and kernel size is 2, we do not have an overlap. After pooling the feature map size of ($100 \times 100$) becomes ($50 \time 50$).
+
+\subsubsection{Local Response Normalization (LRN)}
+
+In this layer the partial area of ​​an input can be normalized for "lateral inhibition" effect. AlexNet or GoogLenet use this feature.
+
+\noindent \textbf{Layer Type}: LRN
+
+\noindent You must set the parameters:
+
+\noindent Parameters: All optional
+
+\noindent \textbf{local\underline{{ }{ }}size}: The number of channels to sum over (for cross channel LRN) or the side length of the square region to sum over (for within channel LRN) The default is 5. If the cross-channel LRN, then the sum of the number of channels; if it is LRN in the channel, then the length of the square area summation.
+
+\noindent \textbf{alpha}: The default is 1.  The scaling parameter (see below).
+
+\noindent \textbf{beta}: The default is 5. The exponent (see below).
+
+\noindent \textbf{norm\underline{{ }{ }}region}: The default is across\underline{{ }{ }}channels. There are two options, across\underline{{ }{ }}channels represents between adjacent channels summed normalized. within\underline{{ }{ }}channel expressed in a specific area inside a channel summing normalized. Local\underline{{ }{ }}size corresponding to the previous parameter.
+
+The local response normalization layer performs a kind of “lateral inhibition” by normalizing over local input regions. In across\underline{{ }{ }}channels mode, the local regions extend across nearby channels, but have no spatial extent (i.e., they have shape local\underline{{ }{ }}size x 1 x 1). In within\underline{{ }{ }}channel mode, the local regions extend spatially, but are in separate channels (i.e., they have shape 1 x local\underline{{ }{ }}size x local\underline{{ }{ }}size). Each input value is divided by $(1+(\frac{\alpha}{n}\sum_{i}x_{i}^{2}))^{\beta}$, where nn is the size of each local region, and the sum is taken over the region centered at that value (zero padding is added where necessary) \cite{Berkeley}.
+
+\begin{lstlisting}[style=json, frame=single]
+layers {
+  name: " NORM1 "
+  type: LRN
+  bottom: " pool1 "
+  Top: " NORM1 "
+  lrn_param {
+    local_size: 5
+    Alpha: from 0.0001
+    Beta: 0.75
+  }
+}
+\end{lstlisting}
+
+\newpage
+
+\subsection{Activation Layers and Parameters}
+
+ReLU is currently the most used activation function, mainly because of its faster convergence, and to maintain the same effect. In general, activation / Neuron layers are element-wise operators, taking one bottom blob and producing one top blob of the same size. In the layers below, we will ignore the input and out sizes as they are identical:
+
+\noindent \textbf{Input} : $n_{i} \times c_{i}  \times h_{i}  \times w_{i} $
+
+\noindent \textbf{Output}: $n_{o}  \times c_{o} \times h_{o} \times w_{o}$
+
+\subsubsection{ReLU / Rectified-Linear and Leaky-ReLU}
+
+\noindent \textbf{Layer Type}: ReLU
+
+\emph{Other parameters:}
+
+\noindent 　 \textbf{negative\underline{{ }{ }}slope}: Specifies whether to leak the negative part by multiplying it with the slope value rather than setting it to 0.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " relu1 "
+  type: " Relu "
+  bottom: " pool1 "
+  top: " pool1 "
+}
+\end{lstlisting}
+
+Given an input value $x$, The ReLU layer computes the output as $x$ if $x > 0$ and negative\underline{{ }{ }}slope $* x$ if $x <= 0$. When the negative slope parameter is not set, it is equivalent to the standard ReLU function of taking $max(x, 0)$.
+
+\subsubsection{Sigmoid}
+
+\noindent \textbf{Layer Type}: Sigmoid
+
+The Sigmoid layer computes the output as sigmoid(x) for each input element $x$.
+
+
+\begin{gather}
+S(x) = \frac{1}{1+e^{-x}}
+\end{gather}
+
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "encode1neuron"
+  bottom: "encode1"
+  top: "encode1neuron"
+  type: "Sigmoid"
+}
+\end{lstlisting}
+
+\subsubsection{TanH / Hyperbolic Tangent}
+
+\noindent \textbf{Layer Type}: TanH
+
+The TanH layer computes the output as tanh(x) for each input element $x$. The hyperbolic tangent function is used for data conversion.
+
+\begin{gather}
+tanh(x) = \frac{sinh x}{cosh x}=\frac{e^{x}-e^{-x}}{e^{x}+e^{-x}}
+\end{gather}
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "layer"
+  bottom: "in"
+  top: "out"
+  type: "TanH"
+}
+\end{lstlisting}
+
+\subsubsection{Absolute Value}
+
+\noindent \textbf{Layer Type}: AbsVal
+
+The AbsVal layer computes the output as abs(x) for each input element x. Each seeking the absolute value of the input data.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "layer"
+  bottom: "in"
+  top: "out"
+  type: "AbsVal"
+}
+\end{lstlisting}
+
+\subsubsection{Power}
+
+\noindent \textbf{Layer Type}: Power
+
+Perform power operation on each input data.
+
+\begin{gather}
+f (x) = (shift + scale * x) ^ {power}
+\end{gather}
+\emph{Other parameters:}
+
+\noindent \textbf{power}: The default is 1
+
+\noindent \textbf{scale}: The default is 1
+
+\noindent \textbf{shift}: The default is 0
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "layer"
+  bottom: "in"
+  top: "out"
+  type: "Power"
+  power_param {
+    power: 1
+    scale: 1
+    shift: 0
+  }
+}
+\end{lstlisting}
+
+\subsubsection{BNLL}
+
+\noindent \textbf{Layer Type}: BNLL
+
+Binomial normal log likelihood abbreviation. The BNLL (binomial normal log likelihood) layer computes the output as $log(1 + exp(x))$ for each input element $x$.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Layer "
+  bottom: " in "
+  Top: " OUT "
+  type: "BNLL"
+}
+\end{lstlisting}
+
+\newpage
+
+\subsection{Loss Layers}
+
+Loss drives learning by comparing an output to a target and assigning cost to minimize. The loss itself is computed by the forward pass and the gradient w.r.t. to the loss is computed by the backward pass.
+
+\subsubsection{Softmax-loss}
+
+\noindent \textbf{Layer Type}: SoftmaxWithLoss
+
+Softmax-loss and softmax calculation is substantially the same. Softmax is a classifier, calculate the probability category (Likelihood), is an extension of Logistic Regression. Binary Logistic Regression can only be used while softmax can be used for multiple classification.
+
+\noindent Softmax Vs. softmax-loss:
+
+\noindent Softmax formula:
+
+\begin{gather}
+p(z)_{j} = \frac{e^{zj}}{\sum_{k=1}^{K}e^{zk}}   \hspace{1cm} for j= 1,2,...,K
+\end{gather}
+
+\noindent The softmax-loss formula:
+
+\begin{gather}
+L = -\sum_{j} y_{j}log p_{j}
+\end{gather}
+
+The softmax loss layer computes the multinomial logistic loss of the softmax of its inputs. It's conceptually identical to a softmax layer followed by a multinomial logistic loss layer, but provides a more numerically stable gradient. If the ultimate goal of every user is to obtain the probability of each category of likelihood then the Softmax layer is used.
+
+\noindent Softmax-loss layer: output value is loss
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Loss "
+  type: " SoftmaxWithLoss "
+  bottom: " IP1 "
+  bottom: " label "
+  top: " Loss "
+}
+\end{lstlisting}
+
+\noindent Softmax layer: output likelihood values
+
+\begin{lstlisting}[style=json, frame=single]
+layers {
+  bottom: " cls3_fc "
+  Top: " prob "
+  name: " prob "
+  type: "Softmax"
+}
+\end{lstlisting}
+
+\subsubsection{Accuracy}
+
+\noindent \textbf{Layer Type}: Accuracy
+
+Accuracy scores the output as the accuracy of output with respect to target – it is not actually a loss and has no backward step.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Accuracy "
+  type: " Accuracy "
+  bottom: " IP2 "
+  bottom: " label "
+  top: " Accuracy "
+  include {
+    phase: TEST
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Sum-of-Squares / Euclidean}
+
+\noindent \textbf{Layer Type}: EuclideanLoss
+
+The Euclidean loss layer computes the sum of squares of differences of its two inputs.
+
+\begin{gather}
+\frac{1}{2N}\sum_{i=1}^{N}||x_{i}^{1}-x_{i}^{2}||_{2}^{2}
+\end{gather}
+
+\subsubsection{Hinge / Margin}
+
+\noindent \textbf{Layer Type}: HingeLoss
+
+\noindent Parameters: optional
+
+\noindent \textbf{norm }: The norm used. Currently L1, L2
+
+\noindent Inputs:
+
+$n * c * h * w$ Predictions
+
+$n * 1 * 1 * 1$ Labels
+
+\noindent Output:
+
+$1 * 1 * 1 * 1$ Computed Loss
+
+\begin{lstlisting}[style=json, frame=single]
+# L1 Norm
+layer {
+  name: "loss"
+  type: "HingeLoss"
+  bottom: "pred"
+  bottom: "label"
+}
+
+# L2 Norm
+layer {
+  name: "loss"
+  type: "HingeLoss"
+  bottom: "pred"
+  bottom: "label"
+  top: "loss"
+  hinge_loss_param {
+    norm: L2
+  }
+}
+\end{lstlisting}
+
+\noindent The hinge loss layer computes a one-vs-all hinge or squared hinge loss.
+
+\subsubsection{Sigmoid Cross-Entropy}
+
+\noindent \textbf{Layer Type}: SigmoidCrossEntropyLoss
+
+\subsubsection{Infogain}
+
+\noindent \textbf{Layer Type}: InfogainLoss
+
+\newpage
+
+\subsection{Common Layers}
+
+\subsubsection{Inner Product or Fully Connected layer}
+
+The InnerProduct layer (also usually referred to as the fully connected layer) treats the input as a simple vector and produces an output in the form of a single vector (with the blob’s height and width set to 1).
+
+\noindent Input: $n_{i} \times c_{i} \times h_{i}  \times w_{i} $
+
+\noindent Output: $n_{o} \times c_{o} \times 1 \times 1$
+
+\noindent \textbf{Layer Type}: Inner Product
+
+Full connectivity layer is actually a convolution layer, but its primary data convolution kernel size and the same size. So its basic parameters and parameter convolution layer of the same.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "fc8"
+  type: "InnerProduct"
+  # learning rate and decay multipliers for the weights
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  inner_product_param {
+    num_output: 1000
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+  bottom: "fc7"
+  top: "fc8"
+}
+\end{lstlisting}
+
+\subsubsection{Splitting}
+
+\noindent \textbf{Layer Type}: Split
+
+The Split layer is a utility layer that splits an input blob to multiple output blobs. This is used when a blob is fed into multiple output layers.
+
+\subsubsection{Flattening}
+
+\noindent \textbf{Layer Type}: Flatten
+
+The Flatten layer is a utility layer that flattens an input of shape $n * c * h * w$ to a simple vector output of shape $n * (c*h*w)$
+
+\subsubsection{Reshape}
+
+\noindent \textbf{Layer Type}: Reshape
+
+\noindent Input: A single blob with arbitrary dimensions.
+
+\noindent Output: The same blob, with modified dimensions, as specified by reshape\underline{{ }{ }}param
+
+\begin{lstlisting}[style=json, frame=single]
+ layer {
+    name: "reshape"
+    type: "Reshape"
+    bottom: "input"
+    top: "output"
+    reshape_param {
+      shape {
+        dim: 0  # copy the dimension from below
+        dim: 2
+        dim: 3
+        dim: -1 # infer it from the other dimensions
+      }
+    }
+  }
+\end{lstlisting}
+
+The Reshape layer can be used to change the dimensions of its input, without changing its data. Just like the Flatten layer, only the dimensions are changed; no data is copied in the process.
+
+Output dimensions are specified by the ReshapeParam proto. Positive numbers are used directly, setting the corresponding dimension of the output blob. In addition, two special values are accepted for any of the target dimension values:
+
+\begin{itemize}
+  \item 0 means “copy the respective dimension of the bottom layer”. That is, if the bottom has 2 as its 1st dimension, the top will have 2 as its 1st dimension as well, given dim: 0 as the 1st target dimension.
+  \item -1 stands for “infer this from the other dimensions”. This behavior is similar to that of -1 in numpy’s or [] for MATLAB’s reshape: this dimension is calculated to keep the overall element count the same as in the bottom layer. At most one -1 can be used in a reshape operation.
+\end{itemize}
+
+Specifying reshape\underline{{ }{ }}param { shape { dim: 0 dim: -1 } } makes the layer behave in exactly the same way as the Flatten layer.
+
+As another example, there is an optional parameter set shape, for each dimension of the data value of the specified blob (blob is a four-dimensional data: $n * c * w * h$).
+
+\noindent \textbf{dim}: 0 indicates the same dimension, namely the input and output are the same dimensions.
+
+\noindent \textbf{dim}: 2 or dim: 3 original dimension becomes 2 or 3
+
+\noindent \textbf{dim}: -1 indicates calculated automatically by the system dimensions. The total amount of data the same, the system will automatically calculate the value based on the current dimension dimension other three-dimensional blob data.
+
+\noindent Suppose the original data: $64 * 3 * 28 * 28$, 64 color photographs showing the third channel $28 * 28$
+
+\noindent After reshape transformation:
+
+\begin{lstlisting}[style=json, frame=single]
+   reshape_param {
+      shape {
+        dim: 0
+        dim: 0
+        Dim: 14
+        Dim: -1
+      }
+    }
+\end{lstlisting}
+
+\noindent Output data: $64 * 14 * 56 * 3$
+
+\subsubsection{Dropout}
+
+\noindent \textbf{Layer Type}: Dropout
+
+Dropout is a trick to prevent overfitting. The network can make some random hidden layer weights does not work. Only you need to set a dropout\underline{{ }{ }}ratio it.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: " Drop7 "
+  type: " Dropout "
+  bottom: " FC7-CONV "
+  top: " FC7-CONV "
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Concatenation}
+
+\noindent \textbf{Layer Type}: Concat
+
+The Concat layer is a utility layer that concatenates its multiple input blobs to one single output blob.
+
+\noindent \textbf{axis }:  0 for concatenation along num and 1 for channels.
+
+\noindent Input:
+
+\noindent $n_i * c_i * h * w$ for each input blob i from 1 to K.
+
+\noindent Output:
+
+\noindent if axis = 0: $(n_{1} + n_{2} + ... + n_{K}) * c_{1} * h * w$, and all input $c_{i}$ should be the same.
+
+\noindent if axis = 1: $n_{1} * (c_{1} + c_{2} + ... + c_{K}) * h * w$, and all input $n_{i}$ should be the same.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "concat"
+  bottom: "in1"
+  bottom: "in2"
+  top: "out"
+  type: "Concat"
+  concat_param {
+    axis: 1
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Slicing}
+
+\noindent \textbf{Layer Type}: Slice
+
+The Slice layer is a utility layer that slices an input layer to multiple output layers along a given dimension (currently num or channel only) with given slice indices.
+
+\begin{lstlisting}[style=json, frame=single]
+layer {
+  name: "slicer_label"
+  type: "Slice"
+  bottom: "label"
+  ## Example of label with a shape N x 3 x 1 x 1
+  top: "label1"
+  top: "label2"
+  top: "label3"
+  slice_param {
+    axis: 1
+    slice_point: 1
+    slice_point: 2
+  }
+}
+\end{lstlisting}
+
+\noindent axis indicates the target axis; slice\underline{{ }{ }}point indicates indexes in the selected dimension (the number of indices must be equal to the number of top blobs minus one).
+
+\subsubsection{Elementwise Operations}
+
+\noindent \textbf{Layer Type}: Eltwise
+
+\subsubsection{Argmax}
+
+\noindent \textbf{Layer Type}: ArgMax
+
+
+\subsubsection{Mean-Variance Normalization}
+
+\noindent \textbf{Layer Type}: MVN
+
+
+\newpage
+\section{CAFFE SOLVER}
+
+\subsection{Solver and its configuration file}
+
+Solver is the core part of the caffe software, which coordinates the operation of the entire model. All the parameters of the solver in caffe program will run from solver profile.  Solver main role is to call to the alternate forward pass algorithm and backward pass algorithm to update the parameters, in order to minimize loss function, This is actually an iterative optimization algorithm.
+
+The current version of caffe offers six optimization algorithm, we can set each optimization algorithm and its configuration in the solver file.
+
+
+\begin{center}
+\textbf{Optimization Algorithms Available in Caffe}
+\end{center}
+
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{| m{3in}| m{3cm}|}
+\hline
+\thead{Training Algorithm }            & \thead{Type}   \\ \hline \hline
+Gradient Descent Stochastic            &"SGD"           \\ \hline
+AdaDelta                               &"AdaDelta"      \\ \hline
+Adaptive Gradient                      &"AdaGrad"       \\ \hline
+ADAM                                   &"Adam"          \\ \hline
+The Accelerated Gradient apos Nesterov &"Nesterov"      \\ \hline
+RMSprop                                &"RMSProp"       \\ \hline
+\end{tabular}
+\end{center}
+
+\noindent In every iteration, solver steps perform the following actions:
+\begin{enumerate}
+  \item Call forward algorithm to calculate the final output value, and a corresponding loss.
+  \item Call backward algorithm to calculate each gradient.
+  \item According to the choice of solver method using gradient parameter update.
+  \item Record and save each iteration of the learning rate, snapshots, and the corresponding state.
+\end{enumerate}
+
+
+\noindent Let's look at an example:
+
+
+\begin{lstlisting}[style=json, frame=single]
+NET: " examples / MNIST / lenet_train_test.prototxt "
+test_iter: 100
+test_interval: 500
+base_lr: 0.01
+Momentum: 0.9
+type: SGD
+weight_decay: 0.0005
+lr_policy: " INV "
+Gamma: from 0.0001
+Power: 0.75
+the display: 100
+max_iter: 20000
+Snapshot: 5000
+snapshot_prefix: " examples / MNIST / lenet "
+solver_mode: the CPU
+\end{lstlisting}
+
+\noindent\textbf{NET:} Sets the network model. Net needs to be configured in a special configuration file, each model has a number of layers and activation functions with loss layers (prototxt file see the pervious sections).
+
+\noindent\textbf{test\underline{{ }{ }}iter:} This should be combined with the understanding of the test layer batch\underline{{ }{ }}size. For example, total mnist test data has sample of 10,000 data, testing on all sample test data has a low efficiency, so we will be divided into several batches of data. The number of each batch is batch\underline{{ }{ }}size. Suppose we set batch\underline{{ }{ }}size 100, then we need to iterate 100 times in order to complete the implementation of all test data 10000. Therefore test\underline{{ }{ }}iter set to any value less than maximum iteration. After the implementation of data all at once, we called a epoch.
+
+\noindent\textbf{test\underline{{ }{ }}interval:} The test interval is after 500 iteration we perform testing.
+
+\noindent\textbf{base\underline{{ }{ }}lr:} As long as we use the gradient descent training algorithm for minimizing the error, there will be a learning rate, also called the step size too. base\underline{{ }{ }}lr is the learning rate in caffe. The following adjustments on the basis of the learning rate can be made.
+
+\noindent\textbf{lr\underline{{ }{ }}policy: } See \textbf{lrpolicy}.
+
+\noindent\textbf{Gamma: } See \textbf{lrpolicy}.
+
+\noindent\textbf{Power: } See \textbf{lrpolicy}.
+
+\noindent \textbf{lrpolicy}: can be set to the following sets, the corresponding learning rate is calculated as follows:
+
+\begin{enumerate}
+  \item Fixed: maintaining base\underline{{ }{ }}lr unchanged.
+  \item Step: If it is set to step, you need to set a step size.
+  \begin{itemize}
+    \item $base\_lr * gamma ^ {(floor (\frac{iter}{stepsize})}$
+  \end{itemize}
+  \item Exp:
+  \begin{itemize}
+    \item $base\_lr * gamma ^ {iter}$
+  \end{itemize}
+  \item Inv: If set to inv, also need to set up a power.
+  \begin{itemize}
+    \item $base\_lr * (1 + gamma * iter) ^ {(- power)}$
+  \end{itemize}
+  \item Multistep: If set to multistep, you also need to set a stepvalue.
+  \item Poly: learning rate polynomial error.
+  \begin{itemize}
+    \item $base\_lr *(1 - \frac{iter}{max_iter}) ^ {(power)}$
+  \end{itemize}
+  \item Sigmoid: Sigmoid attenuation.
+  \begin{itemize}
+    \item $base\_lr *(\frac{1} { (1 + exp (-gamma * (iter - stepsize))))}$
+  \end{itemize}
+\end{enumerate}
+
+\noindent\textbf{Momentum:}
+
+\noindent\textbf{type:} Optimization algorithm selection. This line can be saved, because the default value is SGD. There are six methods to choose from.
+
+\noindent\textbf{weight\underline{{ }{ }}decay: } Weight decay term, is to prevent over fitting a parameter.
+
+\noindent\textbf{the display:} Every training 100 times, once displayed on the screen.
+
+\noindent\textbf{max\underline{{ }{ }}iter:} The maximum number of iterations.
+
+\noindent\textbf{Snapshot:} It is the way to save trained model and solver state. snapshot used for training many times to save the settings, the default is 0, not saved. Snapshot\underline{{ }{ }}prefix is the save path.
+
+\noindent You can also set snapshot\underline{{ }{ }}diff, whether to save the gradient.
+
+\noindent You can also set snapshot\underline{{ }{ }}format. There are two options: HDF5 and BINARYPROTO, default BINARYPROTO
+
+\noindent\textbf{solver\underline{{ }{ }}mode: } Set the operation mode to CPU or GPU
+
+We are going to detailed description of each method in the next section.
+
+
+
+
+
+\newpage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{IEEEtran}
+\bibliography{Caffe}
+
+\end{document}
