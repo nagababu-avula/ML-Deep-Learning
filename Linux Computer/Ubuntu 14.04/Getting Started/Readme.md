@@ -1,4 +1,4 @@
-# Guid for using frameworks for a stand alone Linux machine
+# Guide for using frameworks for a stand alone Linux machine
 
 ## Getting Started 
 
