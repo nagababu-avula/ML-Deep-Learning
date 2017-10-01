@@ -18,17 +18,38 @@ end
 
 -->=============================================================
 -- Matrix 1
-N= 2
-M =2
-mt = {}          
-for i=1,N do
-  mt[i] = {}     
-  for j=1,M do
-    mt[i][j] = 0
+R= 2
+C =2
+
+mat1 = {}          
+for i=1,R do
+  mat1[i] = {}     
+  for j=1,C do
+    mat1[i][j] = 2
   end
 end
-print(mt)
+print(mat1)
 
-for k,v in pairs(mt[2]) do 
-  print(k,v) 
+for k,v in pairs(mat1[1]) do print(k,v) end
+-->=============================================================
+-- Matrix 2
+R = 2
+C = 1
+
+mat2 = {} 
+
+for i=1,R do
+  for j=1,C do
+    mat2[i*C + j] = 1
+  end
+end
+
+for k1,v1 in pairs(mat2) do print(k1,v1) end
+-->=============================================================
+-- Unpack
+A={{1,2},{3,4}}
+A[1][1]=6
+
+for i=1,#A do
+print(unpack(A[i]))
 end
