@@ -7,29 +7,9 @@
 -- V2 Sep - 29 - 2017
 -- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -- %%%%%%%%%%%%% Lua Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%
--- loops in Lua
+-- logical operators
 
-x = 0
-    local i = 1
-a = {1,2,3,4,5,6,7,8,9,10}
-    while a[i] do
-      x = x + a[i]
-      i = i + 1
-      print(x)
-      print(i)
-    end
-    
-print(x)
-print(i)
-
--- Repeat
-local i = 1
-x = 0
-  
-repeat
-  x = x +a[i]
-  i = i + 1
-until i==5
-
-print(x)
-print(i)
+print(3 and 6)
+print(nil or 2)
+print(not false)
+print(not 5)

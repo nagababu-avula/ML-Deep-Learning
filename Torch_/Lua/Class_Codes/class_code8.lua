@@ -7,29 +7,28 @@
 -- V2 Sep - 29 - 2017
 -- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -- %%%%%%%%%%%%% Lua Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%
--- loops in Lua
 
-x = 0
-    local i = 1
-a = {1,2,3,4,5,6,7,8,9,10}
-    while a[i] do
-      x = x + a[i]
-      i = i + 1
-      print(x)
-      print(i)
-    end
-    
-print(x)
-print(i)
+-->=============================================================
+-- Array
 
--- Repeat
-local i = 1
-x = 0
-  
-repeat
-  x = x +a[i]
-  i = i + 1
-until i==5
+a = {}   
+for i=1, 1000 do
+  a[i] = 0
+end
 
-print(x)
-print(i)
+-->=============================================================
+-- Matrix 1
+N= 2
+M =2
+mt = {}          
+for i=1,N do
+  mt[i] = {}     
+  for j=1,M do
+    mt[i][j] = 0
+  end
+end
+print(mt)
+
+for k,v in pairs(mt[2]) do 
+  print(k,v) 
+end

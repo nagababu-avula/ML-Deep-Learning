@@ -7,6 +7,8 @@
 -- V2 Sep - 29 - 2017
 -- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -- %%%%%%%%%%%%% Lua Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+-->=============================================================
 -- Functions
 
 function times(x)
@@ -31,3 +33,17 @@ end
 print(x)
 a["z"] = 7
 print(a.z)
+
+-->=============================================================
+-- Functions: whos.lua, by michal-kottman
+-- All global variables in Lua reside in a table available as global variable _G (yes, _G._G == _G). Therefore if you want to list all global variable, you can iterate over the table using pairs()
+
+local base = {}
+for k,v in pairs(_G) do
+    base[k] = true
+end
+return function()
+    for k,v in pairs(_G) do
+        if not base[k] then print(k, type(v), v) end
+    end
+end

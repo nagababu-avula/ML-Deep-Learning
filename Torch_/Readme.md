@@ -13,3 +13,7 @@ It will show you on the terminal how much you will get speed up on GPU for an sp
 * Lua
 
 On this folder you will be able to get the Lua sample class codes and the class exercise code.
+
+* Torch
+
+On this folder you will be able to get the Torch sample class codes and the class exercise code.

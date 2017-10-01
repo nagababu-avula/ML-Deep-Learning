@@ -22,20 +22,6 @@ Logical Operators
 
 Functions
 
-* class_code6
-
-Tabels
-
-* class_code7
-
-Modules
-
-* class_code8
-
-Array and Matrix
-
-
-
 
 
 

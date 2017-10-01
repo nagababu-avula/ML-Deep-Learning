@@ -24,8 +24,8 @@ print(i)
 local i = 1
 x = 0
 
-for i, v in ipairs(a)
-x = x + v
+for i, v in ipairs(a) do
+  x = x + v
 end
 print(x)
 print(i)

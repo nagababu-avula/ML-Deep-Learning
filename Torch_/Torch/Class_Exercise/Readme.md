@@ -6,13 +6,9 @@
 
 Chunk , Global and Local Varibale
 
-* class_exercise2
+* class_exercise1
 
 Factorial Function
-
-* class_exercise3
-
-More General Probles
 
 
 

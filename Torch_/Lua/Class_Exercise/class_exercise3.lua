@@ -7,44 +7,59 @@
 -- V2 Sep - 29 - 2017
 -- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -- %%%%%%%%%%%%% Lua Exercise %%%%%%%%%%%%%%%%%%%%%%%%%%%%
--- golbal variable and Local Varibale
 
--- This is the first chuck of the code.
- g = 5
-    local l = 1        
-    
-    while l < g do
-      local g = l ^ 2
-      print(g)        
-      l = l + 1
-    end
-print(g)
 -->############################################################################################################
 -- Question 1:
 -->=============================================================
---a) Without runnin the code find out what is the valus of g and what is the value of l. Write don your answer in the empty area here.
+-- Write a function to calculate the max number between 2 number using just logical operator
 -->=============================================================
 
 
-
-
--->=============================================================
---b) Run the code and check your results with part a)
--->=============================================================
-
-
-
-
--->=============================================================
---c) Write down a simple rule for your self to remmeber the difference between local and global variable.
--->=============================================================
 
 
 
 -->############################################################################################################
 -- Question 2:
 -->=============================================================
---a) What is the output of the following code.
+-- Write a function to calculate the roots of a second order polynomial
 -->=============================================================
 
 
+
+
+
+
+
+-->############################################################################################################
+-- Question 3:
+-->=============================================================
+-- Wite a function that counts odd numbers backeard from 59 to 1.
+-- Print each number and print the sum of the numbers.
+-- You will get the biuns points if you do it with (for, repeat and while)
+-->=============================================================
+
+
+
+
+
+
+
+-->############################################################################################################
+-- Question 4:
+-->=============================================================
+-- What is the output of the following chunk, and why?
+-->=============================================================
+
+function f()
+  i = 10
+end
+
+function g()
+  local i = 5
+end
+
+print(i)
+f()
+print(i)
+g()
+print(i)
