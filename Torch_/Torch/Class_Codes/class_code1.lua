@@ -15,3 +15,9 @@ a = torch.rand(2,4)
 b = torch.rand(4,3)
 
 print(a)
+
+lfs=require 'lfs'
+lfs.chdir("/home/ajafari/Torch_/Torch/Class_Code/")
+
+print_R = require ("print_r")
+print_R(a)
