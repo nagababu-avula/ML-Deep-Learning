@@ -4,24 +4,31 @@
 
 * class_code1
 
-Simple Lua operation
+Tensor
 
 * class_code2
 
-Loops While and Repeat
+XOR Data
 
 * class_code3
 
-Neumeric Loops and Generic Loops
+Batch Size Data
 
 * class_code4
 
-Logical Operators
+XOR Training
 
 * class_code5
 
-Functions
+Sinwave Tarining
 
+* class_code6
+
+Sinwave Tarining cunn
+
+* class_code7
+
+linear Regression
 
 
 

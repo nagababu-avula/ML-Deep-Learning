@@ -17,3 +17,7 @@ On this folder you will be able to get the Lua sample class codes and the class 
 * Torch
 
 On this folder you will be able to get the Torch sample class codes and the class exercise code.
+
+* Website_Link
+
+You will find all the useful websites you needed for learning torch and you need it for the course.
