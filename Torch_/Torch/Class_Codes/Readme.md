@@ -28,7 +28,24 @@ Sinwave Tarining cunn
 
 * class_code7
 
+function approximation
+
+* class_code8
+
+function approximation
+
+* class_code9
+
+function approximation
+
+* class_code10
+
 linear Regression
+
+
+* class_code11
+
+different transfer function
 
 
 

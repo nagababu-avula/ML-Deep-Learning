@@ -14,6 +14,10 @@ XOR Batch, GNU plot
 
 Function Approximation
 
+* class_exercise3
+
+transfer function
+
 
 
 
