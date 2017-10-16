@@ -14,7 +14,7 @@ There is bug in this code:
 
 The code line from train_mnist.lua function classEval below:
 
-``
+```
 function classEval(module, inputs, targets)
   cm:zero()
   for idx=1,inputs:size(1) do
