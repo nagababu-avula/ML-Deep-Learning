@@ -38,6 +38,8 @@ function classEval(module, inputs, targets)
     local input, target = inputs[idx], targets[idx]  ­­ target.type() ­ number
     local output = module:forward(input)
     cm:add(output, target)
-  end cm:updateValids() return cm.totalValid
+  end 
+  cm:updateValids() 
+  return cm.totalValid
 end
 ```
