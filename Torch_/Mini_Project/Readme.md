@@ -27,7 +27,8 @@ function classEval(module, inputs, targets)
  cm:updateValids()
  return cm.totalValid
 end
-``
+```
+
 Should be changed to the code below to fix issue:
 
 ```
