@@ -42,7 +42,7 @@ trainer:train(dataset)
 -- Question 1:
 -->=============================================================
 --a) Run the XOR Batch Code and write down comments for each line of the code.
---   Explanin what the follwoing code does 
+--   Explain what the follwoing code does 
 -->=============================================================
 
 
