@@ -4,6 +4,8 @@
 
 * HW_Torch_1
 
+Lua files needed to complete the Homework
+
 testfile.lua 
 
 XOR_batch.lua
