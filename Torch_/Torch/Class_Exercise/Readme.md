@@ -1,14 +1,18 @@
-# Class Codes
+# Class Exercise
 
 ## Guide
 
 * class_exercise1
 
-Chunk , Global and Local Varibale
+XOR problem
 
-* class_exercise1
+* class_exercise1-1
 
-Factorial Function
+XOR Batch, GNU plot
+
+* class_exercise2
+
+Function Approximation
 
 
 
