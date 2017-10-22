@@ -20,6 +20,10 @@ Load and plot data
 
 Square and Diamond example traning
 
+* Website_Link
+
+You will find all the useful websites you needed for learning caffe and you need it for the course.
+
 * Packages
 
 We need to install these 2 packages
