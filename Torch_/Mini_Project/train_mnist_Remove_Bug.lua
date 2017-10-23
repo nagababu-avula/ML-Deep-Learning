@@ -1,3 +1,15 @@
+-- %%%%%%%%%%%%% Deep Learning %%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- %%%%%%%%%%%%% Authors  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- Dr. Martin Hagan----->Email: mhagan@okstate.edu 
+-- Dr. Amir Jafari------>Email: amir.h.jafari@okstate.edu
+-- %%%%%%%%%%%%% Date:
+-- V1 Jan - 01 - 2017
+-- V2 Sep - 29 - 2017
+-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- %%%%%%%%%%%%% Torch Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-->=============================================================
+
+
 require 'dp'
 
 -- Load the mnist data set
@@ -41,7 +53,7 @@ end
 function trainEpoch(module, criterion, inputs, targets)
    for i=1,inputs:size(1) do
       local idx = math.random(1,inputs:size(1))
-      local input, target = inputs[idx], targets:narrow(1,idx,1)
+      local input, target = inputs[idx], targets[idx] --targets:narrow(1,idx,1)
       -- forward
       local output = module:forward(input)
       local loss = criterion:forward(output, target)
