@@ -18,8 +18,7 @@ The code line from train_mnist.lua function classEval below:
 function classEval(module, inputs, targets)
   cm:zero()
   for idx=1,inputs:size(1) do
-    local input, target = inputs[idx], targets:narrow(1, idx, 1) target.
-    type() torch.
+    local input, target = inputs[idx], targets:narrow(1, idx, 1) 
     Tensor
     local output = module:forward(input)
     cm:add(output, target)
@@ -35,7 +34,7 @@ Should be changed to the code below to fix issue:
 function classEval(module, inputs, targets)
  cm:zero()
   for idx=1,inputs:size(1) do
-    local input, target = inputs[idx], targets[idx]  ­­ target.type() ­ number
+    local input, target = inputs[idx], targets[idx]
     local output = module:forward(input)
     cm:add(output, target)
   end 
